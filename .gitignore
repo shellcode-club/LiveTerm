@@ -1,0 +1,16 @@
+# Ignore files
+*
+
+# Except sources and includes files
+!src/
+!src/**.c
+!include/
+!include/**.h
+
+# Except Makefile
+!Makefile
+
+# Except Git files
+!.gitignore
+!LICENSE
+!README.md
