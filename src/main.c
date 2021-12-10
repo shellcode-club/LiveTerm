@@ -6,8 +6,14 @@
 #include "include/pty.h"
 #include "include/poll.h"
 #include "include/term.h"
+#include "include/socket.h"
 
 volatile sig_atomic_t running = 1;
+
+void on_child_quit(int sig)
+{
+    running = 0;
+}
 
 void on_poll(int fd, uint32_t events, poll_t *poll)
 {
@@ -17,17 +23,13 @@ void on_poll(int fd, uint32_t events, poll_t *poll)
     // Set null byte.
     buf[len] = 0;
 
-    if (fd == STDIN_FILENO) {
+    if (fd == STDIN_FILENO || fd == 5) {
         write(3, buf, len);
 
     } else {
         write(0, buf, len);
+        write(5, buf, len);
     }
-}
-
-void on_child_quit(int sig)
-{
-    running = 0;
 }
 
 int main(int argc, char **argv)
@@ -83,6 +85,13 @@ int main(int argc, char **argv)
 
     } else {
         poll_t poll = (poll_t){ on_poll, NULL, 0 };
+        int sfd     = socket_connect(argv[1], atol(argv[2]));
+
+        // Check connection.
+        if (sfd == -1) {
+            puts("Unable to connect to host.");
+            return (1);
+        }
 
         // Set raw terminal.
         if (term_set_raw())
@@ -90,6 +99,10 @@ int main(int argc, char **argv)
 
         // Create epoll.
         if (poll_create(&poll))
+            return (1);
+
+        // Add server descriptor.
+        if (poll_add(&poll, sfd, EPOLLIN))
             return (1);
 
         // Add pty descriptor.
@@ -101,9 +114,8 @@ int main(int argc, char **argv)
             return (1);
 
         // Run indefinitely.
-        while (running) {
+        while (running)
             poll_wait(&poll, 16);
-        }
     }
 
     // Destroy pseudo terminal.
