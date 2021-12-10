@@ -8,9 +8,10 @@ OBJ         =   $(SRC:.c=.o)
 PREFIX      =   /usr/bin
 NAME        =   liveterm
 
-CFLAGS      =   -Wall           \
-                -W              \
-                -I include
+CFLAGS      =   -Wall                   \
+                -W                      \
+                -Wno-unused-parameter   \
+                -I .
 
 all:    $(NAME)
 
