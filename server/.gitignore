@@ -1,0 +1,12 @@
+# Ignore files
+*
+
+# Except sources files
+!src/
+!src/**
+
+# Except NodeJS files
+!package.json
+
+# Except Git files
+!.gitignore

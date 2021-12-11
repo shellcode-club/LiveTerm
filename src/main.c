@@ -40,6 +40,9 @@ int main(int argc, char **argv)
     // Ignore CTRL + C.
     signal(SIGCHLD, on_child_quit);
 
+    // Show debug message.
+    puts("Starting a shared terminal.");
+
     // Create pseudo terminal.
     if (pty_create(&pty))
         return (1);
@@ -71,9 +74,6 @@ int main(int argc, char **argv)
 
         if (dup2(pty.slave, STDERR_FILENO) == -1)
             return (1);
-
-        // Show debug message.
-        puts("Starting a shared terminal.");
 
         // Start a new shell.
         execve(pwd->pw_shell, (char*[]){ pwd->pw_shell, 0 }, (char*[]){ 0 });
